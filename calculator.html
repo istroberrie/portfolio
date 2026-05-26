@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Savings Calculator — venberri</title>
+  <link rel="icon" href="favicon.png" type="image/png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy:      #072543;
+      --navy-alt:  #2E3B5B;
+      --gold:      #EAC65A;
+      --gold-soft: rgba(234,198,90,0.85);
+      --white:     #ffffff;
+      --bg:        #F7F8FA;
+      --border:    rgba(7,37,67,0.12);
+      --text:      #072543;
+      --muted:     #6B7A99;
+      --success:   #1DBE72;
+      --radius:    16px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ---- Header ---- */
+    header {
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      padding: 0 40px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      background: var(--navy);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .logo-icon svg { width: 16px; height: 16px; color: var(--gold); }
+
+    .logo-name {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: var(--navy);
+      letter-spacing: -0.01em;
+    }
+
+    nav { display: flex; gap: 32px; }
+
+    nav a {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    nav a:hover { color: var(--navy); }
+
+    /* ---- Hero ---- */
+    .hero {
+      background: var(--navy);
+      padding: 72px 40px 80px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -200px; left: 50%;
+      transform: translateX(-50%);
+      width: 700px; height: 700px;
+      background: radial-gradient(ellipse, rgba(234,198,90,0.12) 0%, transparent 68%);
+      pointer-events: none;
+    }
+
+    .hero-inner { position: relative; z-index: 1; max-width: 640px; margin: 0 auto; }
+
+    .eyebrow {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 16px;
+    }
+
+    .hero h1 {
+      font-family: 'Poppins', sans-serif;
+      font-size: clamp(2rem, 4vw, 2.8rem);
+      font-weight: 800;
+      color: var(--white);
+      line-height: 1.1;
+      margin-bottom: 16px;
+    }
+
+    .hero p {
+      font-size: 1rem;
+      color: rgba(255,255,255,0.65);
+      line-height: 1.65;
+      max-width: 480px;
+      margin: 0 auto 32px;
+    }
+
+    .hero-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+    }
+
+    .pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 999px;
+      padding: 6px 14px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: rgba(255,255,255,0.75);
+    }
+
+    .pill svg { width: 13px; height: 13px; opacity: 0.75; }
+
+    /* ---- Main layout ---- */
+    main {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+
+    /* ---- Card ---- */
+    .card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 36px 40px;
+      margin-bottom: 20px;
+    }
+
+    .card-title {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 24px;
+    }
+
+    /* ---- Step 1: Industry ---- */
+    .industry-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+
+    .industry-btn {
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      padding: 18px 12px;
+      background: var(--white);
+      cursor: pointer;
+      text-align: center;
+      transition: border-color 0.2s, background 0.2s, transform 0.15s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .industry-btn:hover {
+      border-color: var(--navy-alt);
+      transform: translateY(-2px);
+    }
+
+    .industry-btn.active {
+      border-color: var(--navy);
+      background: rgba(7,37,67,0.04);
+    }
+
+    .industry-btn.active .industry-icon { background: var(--navy); }
+    .industry-btn.active .industry-icon svg { color: var(--gold); }
+    .industry-btn.active .industry-label { color: var(--navy); font-weight: 600; }
+
+    .industry-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+
+    .industry-icon svg { width: 18px; height: 18px; color: var(--muted); transition: color 0.2s; }
+
+    .industry-label {
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--muted);
+      transition: color 0.2s;
+    }
+
+    /* ---- Step 2: Service ---- */
+    .service-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .service-btn {
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 16px;
+      background: var(--white);
+      cursor: pointer;
+      text-align: left;
+      transition: border-color 0.2s, background 0.2s, transform 0.15s;
+    }
+
+    .service-btn:hover {
+      border-color: var(--navy-alt);
+      transform: translateY(-2px);
+    }
+
+    .service-btn.active {
+      border-color: var(--navy);
+      background: rgba(7,37,67,0.04);
+    }
+
+    .service-name {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--navy);
+      margin-bottom: 4px;
+    }
+
+    .service-rate {
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    .service-rate strong {
+      color: var(--navy);
+      font-weight: 600;
+    }
+
+    /* ---- Step 3: Sliders ---- */
+    .slider-group { display: flex; flex-direction: column; gap: 28px; }
+
+    .slider-item { display: flex; flex-direction: column; gap: 10px; }
+
+    .slider-label-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+
+    .slider-label {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .slider-value {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--navy);
+      font-family: 'Poppins', sans-serif;
+      min-width: 80px;
+      text-align: right;
+    }
+
+    .slider-hint {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: -4px;
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 4px;
+      background: var(--border);
+      border-radius: 999px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--navy);
+      border: 3px solid var(--white);
+      box-shadow: 0 2px 8px rgba(7,37,67,0.25);
+      cursor: pointer;
+      transition: transform 0.15s;
+    }
+
+    input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
+
+    /* ---- Generate button ---- */
+    .btn-generate {
+      width: 100%;
+      padding: 16px 24px;
+      background: var(--navy);
+      color: var(--white);
+      border: none;
+      border-radius: 12px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background 0.2s, transform 0.15s, opacity 0.2s;
+      margin-top: 8px;
+    }
+
+    .btn-generate:hover:not(:disabled) { background: var(--navy-alt); transform: translateY(-1px); }
+    .btn-generate:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn-generate svg { width: 16px; height: 16px; }
+
+    /* ---- Results ---- */
+    #results { display: none; }
+    #results.visible { display: block; }
+
+    .results-hero {
+      background: var(--navy);
+      border-radius: var(--radius);
+      padding: 40px;
+      margin-bottom: 20px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .results-hero::before {
+      content: '';
+      position: absolute;
+      top: -150px; left: 50%;
+      transform: translateX(-50%);
+      width: 500px; height: 500px;
+      background: radial-gradient(ellipse, rgba(234,198,90,0.1) 0%, transparent 68%);
+      pointer-events: none;
+    }
+
+    .results-hero-inner { position: relative; z-index: 1; }
+
+    .results-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 8px;
+    }
+
+    .results-main {
+      font-family: 'Poppins', sans-serif;
+      font-size: clamp(2.4rem, 6vw, 3.6rem);
+      font-weight: 800;
+      color: var(--white);
+      line-height: 1;
+      margin-bottom: 12px;
+    }
+
+    .roi-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(29,190,114,0.18);
+      border: 1px solid rgba(29,190,114,0.35);
+      border-radius: 999px;
+      padding: 5px 14px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #4FFFAA;
+    }
+
+    /* Stats grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .stat-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+    }
+
+    .stat-card-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .stat-card-value {
+      font-family: 'Poppins', sans-serif;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--navy);
+      line-height: 1.1;
+    }
+
+    .stat-card-value.positive { color: var(--success); }
+
+    /* Bar chart */
+    .bar-section { margin-bottom: 8px; }
+
+    .bar-row {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+
+    .bar-row-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .bar-row-label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .bar-row-amount {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--navy);
+      font-family: 'Poppins', sans-serif;
+    }
+
+    .bar-track {
+      height: 8px;
+      background: var(--bg);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 999px;
+      transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .bar-fill.opportunity { background: var(--navy); }
+    .bar-fill.investment  { background: var(--navy-alt); opacity: 0.5; }
+    .bar-fill.savings     { background: var(--success); }
+
+    /* Methodology */
+    .methodology {
+      background: rgba(7,37,67,0.03);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 24px;
+      margin-top: 20px;
+    }
+
+    .methodology p {
+      font-size: 0.8rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .methodology strong { color: var(--navy); }
+
+    /* ---- CTA ---- */
+    .cta-card {
+      background: var(--gold);
+      border-radius: var(--radius);
+      padding: 36px 40px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+
+    .cta-card-text h3 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: var(--navy);
+      margin-bottom: 4px;
+    }
+
+    .cta-card-text p {
+      font-size: 0.875rem;
+      color: rgba(7,37,67,0.7);
+    }
+
+    .btn-navy {
+      white-space: nowrap;
+      padding: 12px 24px;
+      background: var(--navy);
+      color: var(--white);
+      border: none;
+      border-radius: 10px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: background 0.2s, transform 0.15s;
+    }
+
+    .btn-navy:hover { background: var(--navy-alt); transform: translateY(-1px); }
+    .btn-navy svg { width: 14px; height: 14px; }
+
+    /* ---- Footer ---- */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 24px 40px;
+      text-align: center;
+    }
+
+    footer p {
+      font-size: 0.78rem;
+      color: var(--muted);
+      line-height: 1.8;
+    }
+
+    /* ---- Recalculate note ---- */
+    .recalc-note {
+      text-align: center;
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-top: -8px;
+      margin-bottom: 20px;
+    }
+
+    .recalc-note button {
+      background: none;
+      border: none;
+      color: var(--navy);
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 0.78rem;
+      text-decoration: underline;
+    }
+
+    /* ---- Responsive ---- */
+    @media (max-width: 768px) {
+      header { padding: 0 20px; }
+      nav { display: none; }
+      .hero { padding: 56px 20px 64px; }
+      main { padding: 32px 16px 60px; }
+      .card { padding: 24px 20px; }
+      .industry-grid { grid-template-columns: repeat(2, 1fr); }
+      .service-grid { grid-template-columns: 1fr; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .cta-card { flex-direction: column; text-align: center; }
+      .results-hero { padding: 32px 24px; }
+      footer { padding: 20px; }
+    }
+
+    @media (max-width: 480px) {
+      .hero-pills { flex-direction: column; align-items: center; }
+      .stats-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <a class="logo" href="index.html">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+          <path d="M2 17l10 5 10-5"/>
+          <path d="M2 12l10 5 10-5"/>
+        </svg>
+      </div>
+      <span class="logo-name">venberri</span>
+    </a>
+    <nav>
+      <a href="#how">How it works</a>
+      <a href="#methodology">Methodology</a>
+    </nav>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-inner">
+      <span class="eyebrow">Savings Estimator</span>
+      <h1>Gain clarity. Optimize your business.</h1>
+      <p>Your financial potential, visualized. Quantify the time and cost savings from delegating to a GHL specialist or VA - no signup required.</p>
+      <div class="hero-pills">
+        <span class="pill">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          2-minute calculation, no signup.
+        </span>
+        <span class="pill">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          Industry-calibrated benchmarks.
+        </span>
+        <span class="pill">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Your inputs stay on your device.
+        </span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main -->
+  <main id="how">
+
+    <!-- Step 1: Industry -->
+    <div class="card" id="step1">
+      <div class="card-title">Step 1 — Your Industry</div>
+      <div class="industry-grid">
+        <button class="industry-btn" data-value="coaching" onclick="selectIndustry(this)">
+          <div class="industry-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+          <span class="industry-label">Coaching</span>
+        </button>
+        <button class="industry-btn" data-value="wellness" onclick="selectIndustry(this)">
+          <div class="industry-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          </div>
+          <span class="industry-label">Wellness</span>
+        </button>
+        <button class="industry-btn" data-value="ecommerce" onclick="selectIndustry(this)">
+          <div class="industry-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+          </div>
+          <span class="industry-label">E-commerce</span>
+        </button>
+        <button class="industry-btn" data-value="real_estate" onclick="selectIndustry(this)">
+          <div class="industry-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          </div>
+          <span class="industry-label">Real Estate</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Step 2: Service -->
+    <div class="card" id="step2" style="display:none;">
+      <div class="card-title">Step 2 — Service Type</div>
+      <div class="service-grid">
+        <button class="service-btn" data-value="ghl" data-rate="1500" onclick="selectService(this)">
+          <div class="service-name">GHL Specialist</div>
+          <div class="service-rate">From <strong>$1,500/mo</strong></div>
+        </button>
+        <button class="service-btn" data-value="va" data-rate="1800" onclick="selectService(this)">
+          <div class="service-name">Virtual Assistant</div>
+          <div class="service-rate">From <strong>$1,800/mo</strong></div>
+        </button>
+        <button class="service-btn" data-value="both" data-rate="2900" onclick="selectService(this)">
+          <div class="service-name">Both - full delegation</div>
+          <div class="service-rate">From <strong>$2,900/mo</strong></div>
+        </button>
+      </div>
+    </div>
+
+    <!-- Step 3: Inputs -->
+    <div class="card" id="step3" style="display:none;">
+      <div class="card-title">Step 3 — Your Numbers</div>
+      <div class="slider-group">
+
+        <div class="slider-item">
+          <div class="slider-label-row">
+            <label class="slider-label" for="hoursSlider">Hours delegated per week</label>
+            <span class="slider-value" id="hoursDisplay">10 hrs</span>
+          </div>
+          <input type="range" id="hoursSlider" min="1" max="40" value="10" oninput="updateDisplay()" />
+          <span class="slider-hint">How many hours per week would you hand off?</span>
+        </div>
+
+        <div class="slider-item">
+          <div class="slider-label-row">
+            <label class="slider-label" for="rateSlider">Your hourly value</label>
+            <span class="slider-value" id="rateDisplay">$150/hr</span>
+          </div>
+          <input type="range" id="rateSlider" min="25" max="500" step="5" value="150" oninput="updateDisplay()" />
+          <span class="slider-hint">What's your time worth? Use your effective hourly rate or goal rate.</span>
+        </div>
+
+        <div class="slider-item">
+          <div class="slider-label-row">
+            <label class="slider-label" for="vaRateSlider">VA / specialist rate (optional)</label>
+            <span class="slider-value" id="vaRateDisplay">Use retainer</span>
+          </div>
+          <input type="range" id="vaRateSlider" min="0" max="150" step="5" value="0" oninput="updateDisplay()" />
+          <span class="slider-hint">Set to 0 to use standard monthly retainer benchmarks instead.</span>
+        </div>
+
+      </div>
+
+      <button class="btn-generate" id="generateBtn" onclick="generateReport()">
+        Generate my report
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Results -->
+    <div id="results">
+
+      <div class="results-hero">
+        <div class="results-hero-inner">
+          <div class="results-label">Net Annual Savings</div>
+          <div class="results-main" id="netSavingsDisplay">—</div>
+          <div class="roi-badge" id="roiBadge">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="12" height="12"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+            <span id="roiDisplay">0% ROI</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-card-label">Hours reclaimed / yr</div>
+          <div class="stat-card-value" id="hoursYearDisplay">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-label">Opportunity value</div>
+          <div class="stat-card-value" id="opportunityDisplay">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-label">Service investment</div>
+          <div class="stat-card-value" id="investmentDisplay">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-label">Net advantage</div>
+          <div class="stat-card-value positive" id="netAdvantageDisplay">—</div>
+        </div>
+      </div>
+
+      <!-- Bar chart -->
+      <div class="card bar-section">
+        <div class="card-title">Breakdown</div>
+        <div class="bar-row">
+          <div class="bar-row-top">
+            <span class="bar-row-label">Opportunity value</span>
+            <span class="bar-row-amount" id="barOpportunityLabel">—</span>
+          </div>
+          <div class="bar-track"><div class="bar-fill opportunity" id="barOpportunity" style="width:0%"></div></div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-row-top">
+            <span class="bar-row-label">Service investment</span>
+            <span class="bar-row-amount" id="barInvestmentLabel">—</span>
+          </div>
+          <div class="bar-track"><div class="bar-fill investment" id="barInvestment" style="width:0%"></div></div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-row-top">
+            <span class="bar-row-label">Net savings</span>
+            <span class="bar-row-amount" id="barSavingsLabel">—</span>
+          </div>
+          <div class="bar-track"><div class="bar-fill savings" id="barSavings" style="width:0%"></div></div>
+        </div>
+      </div>
+
+      <p class="recalc-note">Not the right numbers? <button onclick="resetCalc()">Adjust my inputs</button></p>
+
+      <!-- CTA -->
+      <div class="cta-card">
+        <div class="cta-card-text">
+          <h3>Ready to unlock these savings?</h3>
+          <p>Book a free 30-minute discovery call and let's build your delegation plan.</p>
+        </div>
+        <a class="btn-navy" href="https://link.venberri.com/widget/bookings/discovery-call-strawberry" target="_blank" rel="noopener">
+          Book a call
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </a>
+      </div>
+
+      <div class="methodology" id="methodology">
+        <p><strong>Methodology:</strong> Estimates are based on industry-standard benchmarks for delegated time value and typical GHL specialist / VA service rates. Annual calculations use 50 working weeks. Opportunity value = hours reclaimed × your hourly rate. Service investment uses your specified hourly rate (if set) or standard monthly retainer × 12. Net savings = opportunity value - service investment. ROI = net savings ÷ service investment × 100. All estimates are illustrative.</p>
+      </div>
+
+    </div><!-- /results -->
+
+  </main>
+
+  <footer>
+    <p>© 2026 venberri. All estimates are illustrative.</p>
+    <p>Built for coaches, wellness pros, e-commerce & real estate.</p>
+  </footer>
+
+  <script>
+    let selectedIndustry = null;
+    let selectedService  = null;
+    let selectedRate     = 0;
+
+    function selectIndustry(btn) {
+      document.querySelectorAll('.industry-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      selectedIndustry = btn.dataset.value;
+      document.getElementById('step2').style.display = 'block';
+      document.getElementById('step2').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function selectService(btn) {
+      document.querySelectorAll('.service-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      selectedService = btn.dataset.value;
+      selectedRate    = parseInt(btn.dataset.rate, 10);
+      document.getElementById('step3').style.display = 'block';
+      document.getElementById('step3').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      updateDisplay();
+    }
+
+    function updateDisplay() {
+      const hours  = parseInt(document.getElementById('hoursSlider').value, 10);
+      const rate   = parseInt(document.getElementById('rateSlider').value, 10);
+      const vaRate = parseInt(document.getElementById('vaRateSlider').value, 10);
+
+      document.getElementById('hoursDisplay').textContent  = hours + ' hrs';
+      document.getElementById('rateDisplay').textContent   = '$' + rate + '/hr';
+      document.getElementById('vaRateDisplay').textContent = vaRate > 0 ? '$' + vaRate + '/hr' : 'Use retainer';
+    }
+
+    function fmt(n) {
+      return '$' + Math.round(n).toLocaleString('en-US');
+    }
+
+    function generateReport() {
+      if (!selectedIndustry || !selectedService) return;
+
+      const hours  = parseInt(document.getElementById('hoursSlider').value, 10);
+      const rate   = parseInt(document.getElementById('rateSlider').value, 10);
+      const vaRate = parseInt(document.getElementById('vaRateSlider').value, 10);
+
+      const annualHours       = hours * 50;
+      const opportunityValue  = annualHours * rate;
+      const serviceInvestment = vaRate > 0 ? annualHours * vaRate : selectedRate * 12;
+      const netSavings        = opportunityValue - serviceInvestment;
+      const roi               = serviceInvestment > 0 ? Math.round(netSavings / serviceInvestment * 100) : 0;
+
+      // Primary
+      document.getElementById('netSavingsDisplay').textContent = fmt(netSavings);
+      document.getElementById('roiDisplay').textContent        = roi + '% ROI';
+
+      // Stats
+      document.getElementById('hoursYearDisplay').textContent  = annualHours.toLocaleString() + ' hrs';
+      document.getElementById('opportunityDisplay').textContent = fmt(opportunityValue);
+      document.getElementById('investmentDisplay').textContent  = fmt(serviceInvestment);
+      document.getElementById('netAdvantageDisplay').textContent = fmt(netSavings);
+
+      // Bars
+      const maxVal = Math.max(opportunityValue, serviceInvestment, Math.max(netSavings, 0));
+      document.getElementById('barOpportunityLabel').textContent = fmt(opportunityValue);
+      document.getElementById('barInvestmentLabel').textContent  = fmt(serviceInvestment);
+      document.getElementById('barSavingsLabel').textContent     = netSavings > 0 ? fmt(netSavings) : '$0';
+
+      // Delay so display:block renders before transition fires
+      const results = document.getElementById('results');
+      results.style.display = 'block';
+
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          document.getElementById('barOpportunity').style.width = (opportunityValue / maxVal * 100) + '%';
+          document.getElementById('barInvestment').style.width  = (serviceInvestment / maxVal * 100) + '%';
+          document.getElementById('barSavings').style.width     = netSavings > 0 ? (netSavings / maxVal * 100) + '%' : '0%';
+        });
+      });
+
+      results.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function resetCalc() {
+      document.getElementById('results').style.display = 'none';
+      document.getElementById('step1').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  </script>
+
+</body>
+</html>
