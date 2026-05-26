@@ -2948,8 +2948,15 @@
     // ------------------------------------------
     const preloader = document.getElementById('preloader');
     const hidePreloader = () => {
-      preloader.classList.add('hidden');
-      triggerHeroAnimations();
+      if (window._inboundHash) {
+        // Build all GSAP animations (and pin spacers) while the preloader
+        // still covers the page. initGSAPAnimations will scroll to the
+        // correct section and THEN fade the preloader — no hero flash.
+        triggerHeroAnimations();
+      } else {
+        preloader.classList.add('hidden');
+        triggerHeroAnimations();
+      }
     };
 
     if (document.readyState === 'complete') {
@@ -3322,26 +3329,28 @@
       });
 
       // ---- Inbound hash scroll ----
-      // Must run here — after ALL pin spacers are built.
-      // Uses a two-pass approach: first refresh so pin spacers have correct
-      // heights, then wait 120ms for the browser to fully reflow (portfolio
-      // track scrollWidth may still be settling from lazy-loaded favicons),
-      // then refresh again and read the final pixel position.
+      // Runs here after ALL pin spacers exist.
+      // The preloader is still visible at this point (hidePreloader kept it
+      // up when _inboundHash was set), so the user never sees the hero.
+      // We use the same lenis.scrollTo call that internal nav links use,
+      // which correctly accounts for pin spacers via Lenis+ScrollTrigger.
+      // After scrolling, we fade the preloader to reveal the right section.
       if (window._inboundHash) {
         const hashTarget = document.querySelector(window._inboundHash);
         if (hashTarget) {
           ScrollTrigger.refresh();
-          setTimeout(() => {
-            // Second refresh after reflow; catches any lazy-loaded content
-            // that changed scrollWidth after the first refresh.
-            ScrollTrigger.refresh();
-            const targetY = hashTarget.getBoundingClientRect().top + window.pageYOffset;
-            // Use window.scrollTo directly — most reliable for instant jumps.
-            // Then sync Lenis so its internal position matches.
-            window.scrollTo(0, targetY);
-            if (lenis) lenis.scrollTo(targetY, { immediate: true, duration: 0 });
+          requestAnimationFrame(() => requestAnimationFrame(() => {
+            if (lenis) {
+              lenis.scrollTo(hashTarget, { offset: 0, immediate: true, duration: 0 });
+            } else {
+              hashTarget.scrollIntoView({ behavior: 'instant' });
+            }
             history.replaceState(null, '', window._inboundHash);
-          }, 120);
+            // Fade preloader now — reveals the correct section, not the hero
+            preloader.classList.add('hidden');
+          }));
+        } else {
+          preloader.classList.add('hidden');
         }
       }
     }
