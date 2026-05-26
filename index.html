@@ -1970,6 +1970,7 @@
       /* Hero — auto height so content never clips; stacked from top */
       .hero { height: auto; min-height: 100svh; padding-top: 56px; padding-bottom: 56px; overflow: hidden; }
       .hero-content { height: auto; align-items: flex-start; padding: 40px 24px 0; }
+      .hero-title { font-size: 1.55rem; line-height: 1.2; }
       .hero-btns { flex-wrap: wrap; gap: 10px; }
       .circle-badge { display: none; }
 
@@ -1994,6 +1995,8 @@
       .process-inner { padding: 0 24px; }
       .process-top { flex-direction: column; align-items: flex-start; gap: 16px; }
       .process-heading { font-size: 1.55rem; line-height: 1.15; }
+      .process-btn-top { display: none !important; }
+      .process-btn-bottom { display: inline-flex !important; }
       .process-steps { grid-template-columns: 1fr; gap: 36px; }
       .process-steps::before { display: none; }
       .step { padding-right: 0; }
@@ -2497,7 +2500,7 @@
             <span class="eyebrow">How it works</span>
             <h2 class="process-heading">From onboarding to<br>autopilot in 4 steps</h2>
           </div>
-          <a href="#contact" class="btn-primary" style="flex-shrink:0;">
+          <a href="#contact" class="btn-primary process-btn-top" style="flex-shrink:0;">
             <span class="t front">Work with me</span>
             <span class="t back">Let's talk</span>
           </a>
@@ -2525,6 +2528,13 @@
             <div class="step-desc">Monthly retainer or project-based. I stay in your corner to iterate, optimize, and keep your systems running clean.</div>
           </div>
         </div>
+
+        <!-- Mobile-only CTA below steps -->
+        <a href="#contact" class="btn-primary process-btn-bottom" style="margin-top:36px;display:none;">
+          <span class="t front">Work with me</span>
+          <span class="t back">Let's talk</span>
+        </a>
+
         </div>
       </div>
     </section>
@@ -2935,6 +2945,11 @@
     // ------------------------------------------
     // Lenis + GSAP ticker integration
     // ------------------------------------------
+    // Register ScrollTrigger always (mobile + desktop)
+    if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
+      gsap.registerPlugin(ScrollTrigger);
+    }
+
     let lenis;
     if (typeof Lenis !== 'undefined' && window.innerWidth > 768) {
       lenis = new Lenis({
@@ -2944,7 +2959,6 @@
       });
 
       if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
-        gsap.registerPlugin(ScrollTrigger);
         lenis.on('scroll', ScrollTrigger.update);
         gsap.ticker.add((time) => lenis.raf(time * 1000));
         gsap.ticker.lagSmoothing(0);
