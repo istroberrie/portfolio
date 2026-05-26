@@ -2037,6 +2037,8 @@
       .footer-grid { grid-template-columns: 1fr; }
 
       /* CTA */
+      .cta-section { padding: 72px 0; }
+      .cta-title { font-size: clamp(1.6rem, 6vw, 2.2rem); }
       .cta-btns { flex-direction: column; align-items: center; }
       .cta-btns .btn-primary, .cta-btns .btn-outline { width: 100%; max-width: 320px; justify-content: center; }
 
@@ -3087,6 +3089,12 @@
         if (typeof SplitType === 'undefined') return;
         document.querySelectorAll(selector).forEach(el => {
           if (isMobile) {
+            // cta-title: ensure visibility — ScrollTrigger may not fire reliably on mobile
+            // when section is near bottom of page; skip animation to avoid invisible heading
+            if (el.classList.contains('cta-title')) {
+              gsap.set(el, { autoAlpha: 1, y: 0 });
+              return;
+            }
             gsap.from(el, {
               autoAlpha: 0, y: 16, duration: 0.6, ease: 'power2.out',
               scrollTrigger: { trigger: el, start: 'top 88%', toggleActions: 'play none none none' }
@@ -3337,7 +3345,7 @@
         if (el.closest('.process-section') || el.closest('.problem-section') || el.closest('.why-list') ||
             el.classList.contains('svc-card') || el.classList.contains('stat') ||
             el.classList.contains('testi-card') || el.classList.contains('section-heading') ||
-            el.classList.contains('faq-item')) return;
+            el.classList.contains('faq-item') || el.classList.contains('cta-title')) return;
         gsap.from(el, {
           y: 36, autoAlpha: 0, duration: 0.72, ease: 'power2.out',
           scrollTrigger: { trigger: el, start: 'top 90%', toggleActions: 'play none none none' }
