@@ -3153,7 +3153,10 @@
           invalidateOnRefresh: true,
           scrub: 1,
           animation: tl,
-          snap: {
+          // Disable snap on inbound hash loads — snap fires 50ms after landing
+          // at the target and snaps progress>1 back to section end, pulling us
+          // away from the intended scroll position.
+          snap: window._inboundHash ? false : {
             snapTo: 1 / (n - 1),
             duration: { min: 0.3, max: 0.5 },
             ease: 'power1.inOut',
@@ -3200,7 +3203,7 @@
           invalidateOnRefresh: true,
           scrub: 1,
           animation: procTl,
-          snap: {
+          snap: window._inboundHash ? false : {
             snapTo: 1 / (np - 1),
             duration: { min: 0.3, max: 0.5 },
             ease: 'power1.inOut',
@@ -3361,14 +3364,6 @@
               return y;
             }
             const targetY = getAbsoluteTop(hashTarget);
-
-            // TEMP DEBUG — remove after diagnosis
-            const _dbg = document.createElement('div');
-            _dbg.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#c0392b;color:#fff;font:bold 16px/1 monospace;padding:16px 20px;z-index:100000;text-align:center;';
-            _dbg.textContent = 'hash=' + window._inboundHash + '  targetY=' + targetY + '  bodyScrollH=' + document.body.scrollHeight + '  isMob=' + isMobile;
-            document.body.appendChild(_dbg);
-            setTimeout(() => _dbg.remove(), 8000);
-            // END TEMP DEBUG
 
             // lenis.scrollTo(number) sets the absolute scroll position directly,
             // no element-relative BoundingClientRect math involved.
