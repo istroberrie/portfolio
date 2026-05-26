@@ -3322,23 +3322,26 @@
       });
 
       // ---- Inbound hash scroll ----
-      // Runs here — after ALL pin spacers exist.
-      // Uses getBoundingClientRect after a forced reflow so the pixel
-      // position is exact, bypassing any element-lookup quirks in lenis.
+      // Must run here — after ALL pin spacers are built.
+      // Uses a two-pass approach: first refresh so pin spacers have correct
+      // heights, then wait 120ms for the browser to fully reflow (portfolio
+      // track scrollWidth may still be settling from lazy-loaded favicons),
+      // then refresh again and read the final pixel position.
       if (window._inboundHash) {
         const hashTarget = document.querySelector(window._inboundHash);
         if (hashTarget) {
           ScrollTrigger.refresh();
-          // Two rAFs: first lets ST settle, second reads layout after reflow
-          requestAnimationFrame(() => requestAnimationFrame(() => {
+          setTimeout(() => {
+            // Second refresh after reflow; catches any lazy-loaded content
+            // that changed scrollWidth after the first refresh.
+            ScrollTrigger.refresh();
             const targetY = hashTarget.getBoundingClientRect().top + window.pageYOffset;
-            if (lenis) {
-              lenis.scrollTo(targetY, { immediate: true, duration: 0 });
-            } else {
-              window.scrollTo({ top: targetY, behavior: 'instant' });
-            }
+            // Use window.scrollTo directly — most reliable for instant jumps.
+            // Then sync Lenis so its internal position matches.
+            window.scrollTo(0, targetY);
+            if (lenis) lenis.scrollTo(targetY, { immediate: true, duration: 0 });
             history.replaceState(null, '', window._inboundHash);
-          }));
+          }, 120);
         }
       }
     }
