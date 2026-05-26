@@ -3320,6 +3320,25 @@
           scrollTrigger: { trigger: el, start: 'top 90%', toggleActions: 'play none none none' }
         });
       });
+
+      // ---- Inbound hash scroll ----
+      // Runs here — after ALL pin spacers exist — so lenis lands on the
+      // correct section. Cannot run earlier; the preloader delays this
+      // function by 1100ms, which is after any DOMContentLoaded timeout.
+      if (window._inboundHash) {
+        const hashTarget = document.querySelector(window._inboundHash);
+        if (hashTarget) {
+          ScrollTrigger.refresh();
+          requestAnimationFrame(() => requestAnimationFrame(() => {
+            if (lenis) {
+              lenis.scrollTo(hashTarget, { immediate: true, duration: 0 });
+            } else {
+              hashTarget.scrollIntoView({ behavior: 'instant' });
+            }
+            history.replaceState(null, '', window._inboundHash);
+          }));
+        }
+      }
     }
 
     // ------------------------------------------
@@ -3355,26 +3374,6 @@
         }
       });
     });
-
-    // ------------------------------------------
-    // Re-scroll to inbound hash after GSAP init
-    // All pin spacers now exist — lenis.scrollTo
-    // calculates the correct scroll position.
-    // ------------------------------------------
-    if (window._inboundHash) {
-      const hashTarget = document.querySelector(window._inboundHash);
-      if (hashTarget) {
-        ScrollTrigger.refresh();
-        setTimeout(() => {
-          if (lenis) {
-            lenis.scrollTo(hashTarget, { immediate: true, duration: 0 });
-          } else {
-            hashTarget.scrollIntoView({ behavior: 'instant' });
-          }
-          history.replaceState(null, '', window._inboundHash);
-        }, 600);
-      }
-    }
 
   }); // DOMContentLoaded
   </script>
