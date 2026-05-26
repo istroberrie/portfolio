@@ -3322,18 +3322,20 @@
       });
 
       // ---- Inbound hash scroll ----
-      // Runs here — after ALL pin spacers exist — so lenis lands on the
-      // correct section. Cannot run earlier; the preloader delays this
-      // function by 1100ms, which is after any DOMContentLoaded timeout.
+      // Runs here — after ALL pin spacers exist.
+      // Uses getBoundingClientRect after a forced reflow so the pixel
+      // position is exact, bypassing any element-lookup quirks in lenis.
       if (window._inboundHash) {
         const hashTarget = document.querySelector(window._inboundHash);
         if (hashTarget) {
           ScrollTrigger.refresh();
+          // Two rAFs: first lets ST settle, second reads layout after reflow
           requestAnimationFrame(() => requestAnimationFrame(() => {
+            const targetY = hashTarget.getBoundingClientRect().top + window.pageYOffset;
             if (lenis) {
-              lenis.scrollTo(hashTarget, { immediate: true, duration: 0 });
+              lenis.scrollTo(targetY, { immediate: true, duration: 0 });
             } else {
-              hashTarget.scrollIntoView({ behavior: 'instant' });
+              window.scrollTo({ top: targetY, behavior: 'instant' });
             }
             history.replaceState(null, '', window._inboundHash);
           }));
