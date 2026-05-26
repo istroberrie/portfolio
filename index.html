@@ -1391,7 +1391,7 @@
       margin-bottom: 40px;
       flex-shrink: 0;
     }
-    .portfolio-top .section-heading { margin-bottom: 0; color: #fff; }
+    .portfolio-top .section-heading { margin-bottom: 0; color: #fff; font-size: clamp(1.3rem, 2vw, 1.7rem); line-height: 1.25; }
     .portfolio-top .section-heading .line-inner { color: #fff; }
     .portfolio-eyebrow { color: var(--gold); }
     .portfolio-hint {
@@ -2024,7 +2024,9 @@
       }
       .portfolio-track::-webkit-scrollbar { display: none; }
       .port-item, .port-item--diagram { width: min(340px, 78vw); scroll-snap-align: start; flex-shrink: 0; }
-      .portfolio-hint { position: static; margin-top: 20px; }
+      .portfolio-hint { position: static; margin-bottom: 16px; order: 2; }
+      .portfolio-top { order: 1; }
+      .portfolio-track { order: 3; }
 
       /* FAQ */
       .faq-cols { grid-template-columns: 1fr; }
@@ -2480,7 +2482,7 @@
          TOOL STACK
     ============================================= -->
     <section class="tools-section offset">
-      <p class="tools-label">Tools I work with</p>
+      <p class="tools-label">Tech Stack</p>
       <div class="tools-rows">
 
         <!-- Row 1 - forward -->
@@ -2617,7 +2619,7 @@
         <div class="portfolio-top">
           <span class="eyebrow portfolio-eyebrow">Portfolio</span>
           <h2 class="section-heading" style="color:#fff;">
-            <span class="line"><span class="line-inner">See What We've Created</span></span>
+            <span class="line"><span class="line-inner">Explore selected projects that showcase creativity, strategy, and commitment to delivering results.</span></span>
           </h2>
         </div>
 
@@ -2843,7 +2845,7 @@
                 What if I'm using a different platform?
                 <i class="ph ph-plus faq-icon"></i>
               </div>
-              <div class="faq-a">GoHighLevel is my core focus and where I produce the best results. I can work with other platforms, but GHL clients get faster and more reliable outcomes. Let's talk during discovery if you're on something else.</div>
+              <div class="faq-a">I can work with other platforms, but GHL clients get faster and more reliable outcomes. Let's talk during discovery if you're on something else.</div>
             </div>
           </div>
         </div>
