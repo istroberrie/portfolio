@@ -2930,14 +2930,11 @@
   <script>
   // ------------------------------------------
   // External hash navigation fix
-  // The browser scrolls to a hash anchor BEFORE
-  // GSAP creates its pin spacers, so every anchor
-  // from an external page lands at the wrong spot.
-  // Strip the hash now, store it, then re-scroll
-  // after all ScrollTriggers are initialized.
+  // const/let don't cross script tag boundaries —
+  // store on window so DOMContentLoaded can read it.
   // ------------------------------------------
-  const _inboundHash = window.location.hash;
-  if (_inboundHash) {
+  window._inboundHash = window.location.hash;
+  if (window._inboundHash) {
     history.replaceState(null, '', location.pathname + location.search);
     window.scrollTo(0, 0);
   }
@@ -3364,8 +3361,8 @@
     // All pin spacers now exist — lenis.scrollTo
     // calculates the correct scroll position.
     // ------------------------------------------
-    if (_inboundHash) {
-      const hashTarget = document.querySelector(_inboundHash);
+    if (window._inboundHash) {
+      const hashTarget = document.querySelector(window._inboundHash);
       if (hashTarget) {
         ScrollTrigger.refresh();
         setTimeout(() => {
@@ -3374,8 +3371,8 @@
           } else {
             hashTarget.scrollIntoView({ behavior: 'instant' });
           }
-          history.replaceState(null, '', _inboundHash);
-        }, 400);
+          history.replaceState(null, '', window._inboundHash);
+        }, 600);
       }
     }
 
