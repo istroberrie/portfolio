@@ -3348,37 +3348,22 @@
         const hashTarget = document.querySelector(window._inboundHash);
         if (hashTarget) {
           ScrollTrigger.refresh();
-          // Double RAF: give the browser two layout frames to fully
-          // settle pin spacer geometry after the refresh call.
+          // Double RAF: two layout frames so pin spacer geometry settles
+          // fully before we read element positions.
           requestAnimationFrame(() => requestAnimationFrame(() => {
-            let targetY = null;
-
-            for (const st of ScrollTrigger.getAll()) {
-              if (st.trigger !== hashTarget) continue;
-              if (st.pin) {
-                // Pinned section: st.start = scroll-Y where element top = viewport top
-                targetY = Math.max(0, st.start);
-                break;
-              }
-              // Non-pin trigger — check original start keyword
-              const s = st.vars?.start || '';
-              if (typeof s === 'string' && s.includes('bottom')) {
-                // 'top bottom': st.start = scroll-Y where element top = viewport bottom
-                // element at viewport top = st.start + innerHeight
-                targetY = Math.max(0, st.start + window.innerHeight);
-              } else {
-                targetY = Math.max(0, st.start);
-              }
-              break;
+            // Walk offsetParent chain for absolute Y from document top.
+            // getAbsoluteTop is immune to scroll position (unlike BoundingClientRect)
+            // and correctly accounts for GSAP pin spacers which are real DOM nodes
+            // that push offsetTop of sections below them.
+            function getAbsoluteTop(el) {
+              let y = 0;
+              while (el) { y += el.offsetTop; el = el.offsetParent; }
+              return y;
             }
+            const targetY = getAbsoluteTop(hashTarget);
 
-            // Fallback: no matching ScrollTrigger — use absolute offset
-            if (targetY === null) {
-              targetY = hashTarget.getBoundingClientRect().top + window.pageYOffset;
-            }
-
-            // Use lenis.scrollTo(number) — avoids BoundingClientRect math
-            // which is relative-to-viewport and wrong if scroll ≠ 0
+            // lenis.scrollTo(number) sets the absolute scroll position directly,
+            // no element-relative BoundingClientRect math involved.
             if (lenis) {
               lenis.scrollTo(targetY, { immediate: true, duration: 0 });
             } else {
