@@ -239,50 +239,7 @@
     }
 
     /* ---- Step 2: Service ---- */
-    .service-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-    }
-
-    .service-btn {
-      border: 1.5px solid var(--border);
-      border-radius: 12px;
-      padding: 20px 16px;
-      background: var(--white);
-      cursor: pointer;
-      text-align: left;
-      transition: border-color 0.2s, background 0.2s, transform 0.15s;
-    }
-
-    .service-btn:hover {
-      border-color: var(--navy-alt);
-      transform: translateY(-2px);
-    }
-
-    .service-btn.active {
-      border-color: var(--navy);
-      background: rgba(7,37,67,0.04);
-    }
-
-    .service-name {
-      font-size: 0.9rem;
-      font-weight: 600;
-      color: var(--navy);
-      margin-bottom: 4px;
-    }
-
-    .service-rate {
-      font-size: 0.78rem;
-      color: var(--muted);
-    }
-
-    .service-rate strong {
-      color: var(--navy);
-      font-weight: 600;
-    }
-
-    /* ---- Step 3: Sliders ---- */
+    /* ---- Step 2: Sliders ---- */
     .slider-group { display: flex; flex-direction: column; gap: 28px; }
 
     .slider-item { display: flex; flex-direction: column; gap: 10px; }
@@ -602,7 +559,6 @@
       main { padding: 32px 16px 60px; }
       .card { padding: 24px 20px; }
       .industry-grid { grid-template-columns: repeat(2, 1fr); }
-      .service-grid { grid-template-columns: 1fr; }
       .stats-grid { grid-template-columns: repeat(2, 1fr); }
       .cta-card { flex-direction: column; text-align: center; }
       .results-hero { padding: 32px 24px; }
@@ -692,28 +648,9 @@
       </div>
     </div>
 
-    <!-- Step 2: Service -->
-    <div class="card" id="step2" style="display:none;">
-      <div class="card-title">Step 2 — Service Type</div>
-      <div class="service-grid">
-        <button class="service-btn" data-value="ghl" data-rate="1500" onclick="selectService(this)">
-          <div class="service-name">GHL Specialist</div>
-          <div class="service-rate">From <strong>$1,500/mo</strong></div>
-        </button>
-        <button class="service-btn" data-value="va" data-rate="1800" onclick="selectService(this)">
-          <div class="service-name">Virtual Assistant</div>
-          <div class="service-rate">From <strong>$1,800/mo</strong></div>
-        </button>
-        <button class="service-btn" data-value="both" data-rate="2900" onclick="selectService(this)">
-          <div class="service-name">Both - full delegation</div>
-          <div class="service-rate">From <strong>$2,900/mo</strong></div>
-        </button>
-      </div>
-    </div>
-
-    <!-- Step 3: Inputs -->
+    <!-- Step 2: Inputs -->
     <div class="card" id="step3" style="display:none;">
-      <div class="card-title">Step 3 — Your Numbers</div>
+      <div class="card-title">Step 2 — Your Numbers</div>
       <div class="slider-group">
 
         <div class="slider-item">
@@ -841,22 +778,11 @@
 
   <script>
     let selectedIndustry = null;
-    let selectedService  = null;
-    let selectedRate     = 0;
 
     function selectIndustry(btn) {
       document.querySelectorAll('.industry-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       selectedIndustry = btn.dataset.value;
-      document.getElementById('step2').style.display = 'block';
-      document.getElementById('step2').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }
-
-    function selectService(btn) {
-      document.querySelectorAll('.service-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      selectedService = btn.dataset.value;
-      selectedRate    = parseInt(btn.dataset.rate, 10);
       document.getElementById('step3').style.display = 'block';
       document.getElementById('step3').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       updateDisplay();
@@ -869,7 +795,7 @@
 
       document.getElementById('hoursDisplay').textContent  = hours + ' hrs';
       document.getElementById('rateDisplay').textContent   = '$' + rate + '/hr';
-      document.getElementById('vaRateDisplay').textContent = vaRate > 0 ? '$' + vaRate + '/hr' : 'Use retainer';
+      document.getElementById('vaRateDisplay').textContent = vaRate > 0 ? '$' + vaRate + '/hr' : '$0';
     }
 
     function fmt(n) {
@@ -877,7 +803,7 @@
     }
 
     function generateReport() {
-      if (!selectedIndustry || !selectedService) return;
+      if (!selectedIndustry) return;
 
       const hours  = parseInt(document.getElementById('hoursSlider').value, 10);
       const rate   = parseInt(document.getElementById('rateSlider').value, 10);
@@ -885,7 +811,7 @@
 
       const annualHours       = hours * 50;
       const opportunityValue  = annualHours * rate;
-      const serviceInvestment = vaRate > 0 ? annualHours * vaRate : selectedRate * 12;
+      const serviceInvestment = annualHours * vaRate;
       const netSavings        = opportunityValue - serviceInvestment;
       const roi               = serviceInvestment > 0 ? Math.round(netSavings / serviceInvestment * 100) : 0;
 
