@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Automation & Follow-Up Workflows - venberri</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web@2.1.1/src/index.js" defer></script>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --gold:#EAC65A;--navy:#072543;--border:rgba(7,37,67,0.1);
+      --teal:#0bab8e;--teal-light:#d1f7ee;--teal-mid:#9ee8d4;
+      --wait-bg:#f0f1f3;--wait-border:#d0d4da;
+    }
+    body{font-family:'Inter',sans-serif;color:var(--navy);background:#fff;overflow-x:hidden}
+
+    /* ---- HERO ---- */
+    .hero{background:var(--navy);padding:42px 28px 46px;position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:flex-start;gap:12px}
+    .hero-orbs{position:absolute;inset:0;pointer-events:none}
+    .orb{position:absolute;border-radius:50%;background:var(--gold);opacity:.06;animation:orb-drift 8s ease-in-out infinite}
+    .orb:nth-child(1){width:260px;height:260px;top:-80px;right:-60px;animation-delay:0s}
+    .orb:nth-child(2){width:120px;height:120px;bottom:-40px;left:25%;animation-delay:-3s}
+    .orb:nth-child(3){width:70px;height:70px;top:40px;left:12%;animation-delay:-5s}
+    @keyframes orb-drift{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(10px,-14px) scale(1.1)}}
+    .icon-wrap{position:relative;width:72px;height:72px;display:flex;align-items:center;justify-content:center}
+    .icon-ring{position:absolute;inset:0;border-radius:50%;border:2px solid var(--gold);opacity:.35;animation:ring-pulse 2.4s ease-in-out infinite}
+    .icon-ring.r2{animation-delay:-1.2s}
+    @keyframes ring-pulse{0%{transform:scale(1);opacity:.35}50%{transform:scale(1.22);opacity:.1}100%{transform:scale(1);opacity:.35}}
+    .hero-icon{font-size:34px;color:var(--gold);animation:icon-float 3s ease-in-out infinite;position:relative;z-index:1}
+    @keyframes icon-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+    .eyebrow{font-size:.62rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.4)}
+    .hero h1{font-family:'Poppins',sans-serif;font-size:clamp(1.5rem,4vw,2.1rem);font-weight:800;line-height:1.1;color:#fff}
+    .hero h1 span{color:var(--gold)}
+
+    /* ---- TABS ---- */
+    .tabs-wrap{background:#fff;border-bottom:2px solid var(--border);position:sticky;top:0;z-index:10}
+    .tabs{display:flex;gap:0;overflow-x:auto;scrollbar-width:none;padding:0 24px}
+    .tabs::-webkit-scrollbar{display:none}
+    .tab{flex-shrink:0;padding:14px 18px;font-family:'Poppins',sans-serif;font-size:.74rem;font-weight:700;letter-spacing:.04em;color:rgba(7,37,67,.4);background:none;border:none;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:color .18s,border-color .18s;white-space:nowrap}
+    .tab.active{color:var(--navy);border-bottom-color:var(--navy)}
+    .tab:hover:not(.active){color:var(--navy)}
+
+    /* ---- PANEL ---- */
+    .panel{display:none;padding:28px 24px 48px}
+    .panel.active{display:block}
+
+    /* ---- WORKFLOW HEADER ---- */
+    .wf-header{margin-bottom:20px}
+    .wf-breadcrumb{font-size:.6rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);display:block;margin-bottom:6px}
+    .wf-title{font-family:'Poppins',sans-serif;font-size:1.25rem;font-weight:800;color:var(--navy);margin-bottom:3px}
+    .wf-subtitle{font-size:.8rem;color:rgba(7,37,67,.45)}
+
+    /* ---- LEGEND ---- */
+    .legend{display:flex;flex-wrap:wrap;gap:14px;margin-bottom:24px;padding:12px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+    .legend-item{display:flex;align-items:center;gap:6px;font-size:.68rem;color:rgba(7,37,67,.6);font-weight:500}
+    .legend-swatch{width:14px;height:14px;border-radius:3px;flex-shrink:0}
+    .swatch-action{background:var(--teal-light);border:1.5px solid var(--teal)}
+    .swatch-wait{background:var(--wait-bg);border:1.5px solid var(--wait-border)}
+    .swatch-decision{width:13px;height:13px;background:var(--teal);transform:rotate(45deg);border-radius:2px}
+    .swatch-end-human{background:#0a4535;border-radius:50%}
+    .swatch-end-manual{background:#3a3a3a;border-radius:50%}
+
+    /* ---- FLOWCHART ---- */
+    .wf-chart{display:flex;flex-direction:column;align-items:center;gap:0;max-width:420px;margin:0 auto}
+
+    /* Nodes */
+    .fn{width:100%;border-radius:12px;padding:13px 18px;text-align:center;position:relative}
+    .fn-action{background:var(--teal-light);border:2px solid var(--teal)}
+    .fn-wait{background:var(--wait-bg);border:2px solid var(--wait-border)}
+    .fn-end-human{background:#0a4535;border:2px solid #0a4535}
+    .fn-end-manual{background:#3a3a3a;border:2px solid #3a3a3a}
+    .fn-title{font-family:'Poppins',sans-serif;font-size:.88rem;font-weight:700;color:#0a3b2e;line-height:1.25}
+    .fn-wait .fn-title{color:#555}
+    .fn-end-human .fn-title,.fn-end-manual .fn-title{color:#fff}
+    .fn-sub{font-size:.73rem;color:#2a7a62;margin-top:2px;line-height:1.4}
+    .fn-wait .fn-sub{color:#888}
+    .fn-end-human .fn-sub,.fn-end-manual .fn-sub{color:rgba(255,255,255,.65)}
+
+    /* Arrow */
+    .fn-arrow{display:flex;flex-direction:column;align-items:center;height:28px}
+    .fn-arrow-line{width:2px;flex:1;background:#aab4c0}
+    .fn-arrow-head{width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:7px solid #aab4c0}
+
+    /* Decision node */
+    .fn-decision{display:flex;flex-direction:column;align-items:center;gap:6px;width:100%}
+    .fn-diamond-wrap{display:flex;align-items:center;justify-content:center;width:100%}
+    .fn-diamond{width:40px;height:40px;background:var(--teal);transform:rotate(45deg);border-radius:5px;flex-shrink:0}
+    .fn-decision-label{font-family:'Poppins',sans-serif;font-size:.82rem;font-weight:700;color:var(--navy);margin-top:2px;text-align:center}
+    .fn-decision-sub{font-size:.72rem;color:rgba(7,37,67,.45);text-align:center}
+
+    /* Branch */
+    .fn-branch{display:flex;gap:10px;width:100%;align-items:flex-start;position:relative;padding-top:22px;margin-top:-2px}
+    /* T-bar: horizontal line connecting both column stems */
+    .fn-branch::before{content:'';position:absolute;top:0;left:calc(25% + 5px);right:calc(25% + 5px);height:2px;background:#aab4c0}
+    /* Stem arrow before branch: hide arrowhead, keep the line */
+    .fn-decision + .fn-arrow .fn-arrow-head{display:none}
+    .fn-branch-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:0;position:relative}
+    /* Vertical drop from T-bar to label */
+    .fn-branch-col::before{content:'';position:absolute;top:-22px;left:50%;transform:translateX(-50%);width:2px;height:22px;background:#aab4c0}
+    .fn-branch-arrow{display:flex;flex-direction:column;align-items:center;height:28px}
+    .fn-branch-arrow-line{width:2px;flex:1;background:#aab4c0}
+    .fn-branch-arrow-head{width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:7px solid #aab4c0}
+    .fn-branch-label{font-size:.65rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--teal);background:rgba(11,171,142,.1);border-radius:4px;padding:2px 7px;margin-bottom:4px;text-align:center}
+    .fn-branch-label--no{color:#e05c5c;background:rgba(224,92,92,.08)}
+    .fn-branch-node{width:100%}
+    .fn-branch-node .fn{border-radius:10px;padding:10px 14px}
+  </style>
+</head>
+<body>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-orbs"><div class="orb"></div><div class="orb"></div><div class="orb"></div></div>
+    <div class="icon-wrap">
+      <div class="icon-ring"></div><div class="icon-ring r2"></div>
+      <i class="ph-fill ph-lightning hero-icon"></i>
+    </div>
+    <span class="eyebrow">Automation Sample</span>
+    <h1>Workflow &amp; follow-up <span>automations</span></h1>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs-wrap">
+    <div class="tabs" id="tabBar">
+      <button class="tab active" data-target="lead">New Lead</button>
+      <button class="tab" data-target="missed">Missed Call</button>
+      <button class="tab" data-target="onboarding">Client Onboarding</button>
+      <button class="tab" data-target="appointment">Appointment</button>
+    </div>
+  </div>
+
+  <!-- ======================== PANEL 1: NEW LEAD ======================== -->
+  <div class="panel active" id="lead">
+    <div class="wf-header">
+      <span class="wf-breadcrumb">Lead Automation · Automation Sample</span>
+      <div class="wf-title">New Lead Inquiry Follow-Up</div>
+      <div class="wf-subtitle">Exact steps — GoHighLevel</div>
+    </div>
+    <div class="legend">
+      <span class="legend-item"><span class="legend-swatch swatch-action"></span>Trigger / Action</span>
+      <span class="legend-item"><span class="legend-swatch swatch-wait"></span>Wait / System</span>
+      <span class="legend-item"><span class="legend-swatch swatch-decision"></span>Decision</span>
+      <span class="legend-item"><span class="legend-swatch swatch-end-human"></span>End: Human Follow Up</span>
+      <span class="legend-item"><span class="legend-swatch swatch-end-manual"></span>End: Follow Up Manually</span>
+    </div>
+    <div class="wf-chart">
+      <div class="fn fn-action"><div class="fn-title">New Lead Captured</div><div class="fn-sub">Form submitted · Contact created in CRM</div></div>
+      <div class="fn-arrow"><div class="fn-arrow-line"></div><div class="fn-arrow-head"></div></div>
+      <div class="fn fn-action"><div class="fn-title">Send Instant SMS</div><div class="fn-sub">Automated reply within 2 minutes</div></div>
+      <div class="fn-arrow"><div class="fn-arrow-line"></div><div class="fn-arrow-head"></div></div>
+      <div class="fn fn-action"><div class="fn-title">Send Welcome Email</div><div class="fn-sub">Brand intro + what happens next</div></div>
+      <div class="fn-arrow"><div class="fn-arrow-line"></div><div class="fn-arrow-head"></div></div>
+      <div class="fn fn-wait"><div class="fn-title">Wait 24 Hours</div></div>
+      <div class="fn-arrow"><div class="fn-arrow-line"></div><div class="fn-arrow-head"></div></div>
+      <div class="fn-decision">
+        <div class="fn-diamond-wrap"><div class="fn-diamond"></div></div>
+        <div class="fn-decision-label">Appointment Booked?</div>
+        <div class="fn-decision-sub">Check calendar + pipeline activity</div>
+      </div>
+      <div class="fn-arrow"><div class="fn-arrow-line"></div><div class="fn-arrow-head"></div></div>
+      <div class="fn-branch">
+        <div class="fn-branch-col">
+          <span class="fn-branch-label">Yes</span>
+          <div class="fn-branch-arrow"><div class="fn-branch-arrow-line"></div><div class="fn-branch-arrow-head"></div></div>
+          <div class="fn-branch-node"><div class="fn fn-end-human"><div class="fn-title">Confirmed</div><div class="fn-sub">Move to Confirmed Pipeline</div></div></div>
+        </div>
+        <div class="fn-branch-col">
+          <span class="fn-branch-label fn-branch-label--no">No</span>
+          <div class="fn-branch-arrow"><div class="fn-branch-arrow-line"></div><div class="fn-branch-arrow-head"></div></div>
+          <div class="fn-branch-node"><div class="fn fn-action"><div class="fn-title">Add to Nurture Sequence</div><div class="fn-sub">5-touch drip: email + SMS</div></div></div>
+        </div>
+      </div>
+      <div class="fn-arrow"><div class="fn-arrow-line"></div><div class="fn-arrow-head"></div></div>
+      <div class="fn fn-wait"><div class="fn-title">Wait 3 Days</div></div>
+      <div class="fn-arrow"><div class="fn-arrow-line"></div><div class="fn-arrow-head"></div></div>
+      <div class="fn-decision">
+        <div class="fn-diamond-wrap"><div class="fn-diamond"></div></div>
+        <div class="fn-decision-label">Replied or Booked?</div>
+      </div>
+      <div class="fn-arrow"><div class="fn-arrow-line"></div><div class="fn-arrow-head"></div></div>
+      <div class="fn-branch">
+        <div class="fn-branch-col">
+          <span class="fn-branch-label">Yes</span>
+          <div class="fn-branch-arrow"><div class="fn-branch-arrow-line"></div><div class="fn-branch-arrow-head"></div></div>
+          <div class="fn-branch-node"><div class="fn fn-end-human"><div class="fn-title">Notify Sales Rep</div><div class="fn-sub">Assign and follow up personally</div></div></div>
+        </div>
+        <div class="fn-branch-col">
+          <span class="fn-branch-label fn-branch-label--no">No</span>
+          <div class="fn-branch-arrow"><div class="fn-branch-arrow-line"></div><div class="fn-branch-arrow-head"></div></div>
+          <div class="fn-branch-node"><div class="fn fn-end-manual"><div class="fn-title">Long-term Nurture</div><div class="fn-sub">Monthly touchpoint sequence</div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================== PANEL 2: MISSED CALL ======================== -->
+  <div class="panel" id="missed">
+    <div class="wf-header">
+      <span class="wf-breadcrumb">Sales Workflow · Automation Sample</span>
+      <div class="wf-title">Missed Call Text Back</div>
+      <div class="wf-subtitle">Exact steps — GoHighLevel</div>
+    </div>
+    <div class="legend">
+      <span class="legend-item"><span class="legend-swatch swatch-action"></span>Trigger / Action</span>
+      <span class="legend-item"><span class="legend-swatch swatch-wait"></span>Wait / System</span>
+      <span class="legend-item"><span class="legend-swatch swatch-decision"></span>Decision</span>
+      <span class="legend-item"><span class="legend-swatch swatch-end-human"></span>End: Human Follow Up</span>
+      <span class="legend-item"><span class="legend-swatch swatch-end-manual"></span>End: Follow Up Manually</span>
+    </div>
+    <div class="wf-chart">
+      <div class="fn fn-action"><div class="fn-title">Missed Call Detected</div><div class="fn-sub">Inbound missed call trigger fires</div></div>
+      <div class="fn-arrow"><div class="fn-arrow-line"></div><div class="fn-arrow-head"></div></div>
+      <div class="fn fn-action"><div class="fn-title">Send SMS Reply</div><div class="fn-sub">"Sorry we missed you — reply to reconnect"</div></div>
+      <div class="fn-arrow"><div class="fn-arrow-line"></div><div class="fn-arrow-head"></div></div>
+      <div class="fn fn-action"><div class="fn-title">Create Opportunity</div><div class="fn-sub">Tag: Missed Call · Pipeline updated</div></div>
+      <div class="fn-arrow"><div class="fn-arrow-line"></div><div class="fn-arrow-head"></div></div>
+      <div class="fn fn-wait"><div class="fn-title">Wait 1 Hour</div></div>
+      <div class="fn-arrow"><div class="fn-arrow-line"></div><div class="fn-arrow-head"></div></div>
+      <div class="fn-decision">
+        <div class="fn-diamond-wrap"><div class="fn-diamond"></div></div>
+        <div class="fn-decision-label">Reply Received?</div>
+        <div class="fn-decision-sub">Check conversation for incoming message</div>
+      </div>
+      <div class="fn-arrow"><div class="fn-arrow-line"></div><div class="fn-arrow-head"></div></div>
+      <div class="fn-branch">
+        <div class="fn-branch-col">
+          <span class="fn-branch-label">Yes</span>
+          <div class="fn-branch-arrow"><div class="fn-branch-arrow-line"></div><div class="fn-branch-arrow-head"></div></div>
+          <div class="fn-branch-node"><div class="fn fn-end-human"><div class="fn-title">Notify Team</div><div class="fn-sub">Assign rep · Handle personally</div></div></div>
+        </div>
+        <div class="fn-branch-col">
+          <span class="fn-branch-label fn-branch-label--no">No</span>
+          <div class="fn-branch-arrow"><div class="fn-branch-arrow-line"></div><div class="fn-branch-arrow-head"></div></div>
+          <div class="fn-branch-node"><div class="fn fn-action"><div class="fn-title">Send Follow-up Email</div><div class="fn-sub">Value email + callback link</div></div></div>
+        </div>
+      </div>
+      <div class="fn-arrow"><div class="fn-arrow-line"></div><div class="fn-arrow-head"></div></div>
+      <div class="fn fn-wait"><div class="fn-title">Wait 2 Days</div></div>
+      <div class="fn-arrow"><div class="fn-arrow-line"></div><div class="fn-arrow-head"></div></div>
+      <div class="fn-decision">
+        <div class="fn-diamond-wrap"><div class="fn-diamond"></div></div>
+        <div class="fn-decision-label">Still No Response?</div>
+      </div>
+      <div class="fn-arrow"><div class="fn-arrow-line"></div><div class="fn-arrow-head"></div></div>
+      <div class="fn-branch">
+        <div class="fn-branch-col">
+          <span class="fn-branch-label">Yes</span>
+          <div class="fn-branch-arrow"><div class="fn-branch-arrow-line"></div><div class="fn-branch-arrow-head"></div></div>
+          <div class="fn-branch-node"><div class="fn fn-end-manual"><div class="fn-title">Long-term Nurture</div><div class="fn-sub">Move to re-engagement sequence</div></div></div>
+        </div>
+        <div class="fn-branch-col">
+          <span class="fn-branch-label fn-branch-label--no">No</span>
+          <div class="fn-branch-arrow"><div class="fn-branch-arrow-line"></div><div class="fn-branch-arrow-head"></div></div>
+          <div class="fn-branch-node"><div class="fn fn-end-human"><div class="fn-title">Notify Team</div><div class="fn-sub">Assign rep to close the loop</div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================== PANEL 3: CLIENT ONBOARDING ======================== -->
+  <div class="panel" id="onboarding">
+    <div class="wf-header">
+      <span class="wf-breadcrumb">Client Onboarding · Automation Sample</span>
+      <div class="wf-title">Client Onboarding Workflow</div>
+      <div class="wf-subtitle">Exact steps — GoHighLevel</div>
+    </div>
+    <div class="legend">
+      <span class="legend-item"><span class="legend-swatch swatch-action"></span>Trigger / Action</span>
+      <span class="legend-item"><span class="legend-swatch swatch-wait"></span>Wait / System</span>
+      <span class="legend-item"><span class="legend-swatch swatch-decision"></span>Decision</span>
+      <span class="legend-item"><span class="legend-swatch swatch-end-human"></span>End: Human Follow Up</span>
+      <span class="legend-item"><span class="legend-swatch swatch-end-manual"></span>End: Follow Up Manually</span>
+    </div>
+    <div class="wf-chart">
+      <div class="fn fn-action"><div class="fn-title">Client Added</div><div class="fn-sub">Contact Created</div></div>
+      <div class="fn-arrow"><div class="fn-arrow-line"></div><div class="fn-arrow-head"></div></div>
+      <div class="fn fn-wait"><div class="fn-title">Find Opportunity</div></div>
+      <div class="fn-arrow"><div class="fn-arrow-line"></div><div class="fn-arrow-head"></div></div>
+      <div class="fn fn-action"><div class="fn-title">Create Opportunity</div><div class="fn-sub">Pipeline: Onboarding · Stage: Onboarding Started</div></div>
+      <div class="fn-arrow"><div class="fn-arrow-line"></div><div class="fn-arrow-head"></div></div>
+      <div class="fn fn-action"><div class="fn-title">Send Welcome Email</div><div class="fn-sub">Welcome + Next Steps</div></div>
+      <div class="fn-arrow"><div class="fn-arrow-line"></div><div class="fn-arrow-head"></div></div>
+      <div class="fn fn-action"><div class="fn-title">Send Intake Form</div><div class="fn-sub">Collect onboarding details</div></div>
+      <div class="fn-arrow"><div class="fn-arrow-line"></div><div class="fn-arrow-head"></div></div>
+      <div class="fn fn-wait"><div class="fn-title">Wait 1 Day</div></div>
+      <div class="fn-arrow"><div class="fn-arrow-line"></div><div class="fn-arrow-head"></div></div>
+      <div class="fn-decision">
+        <div class="fn-diamond-wrap"><div class="fn-diamond"></div></div>
+        <div class="fn-decision-label">Form Completed?</div>
+        <div class="fn-decision-sub">Check intake form submission status</div>
+      </div>
+      <div class="fn-arrow"><div class="fn-arrow-line"></div><div class="fn-arrow-head"></div></div>
+      <div class="fn-branch">
+        <div class="fn-branch-col">
+          <span class="fn-branch-label">Yes</span>
+          <div class="fn-branch-arrow"><div class="fn-branch-arrow-line"></div><div class="fn-branch-arrow-head"></div></div>
+          <div class="fn-branch-node"><div class="fn fn-action"><div class="fn-title">Schedule Onboarding Call</div><div class="fn-sub">Send booking link</div></div></div>
+        </div>
+        <div class="fn-branch-col">
+          <span class="fn-branch-label fn-branch-label--no">No</span>
+          <div class="fn-branch-arrow"><div class="fn-branch-arrow-line"></div><div class="fn-branch-arrow-head"></div></div>
+          <div class="fn-branch-node"><div class="fn fn-action"><div class="fn-title">Send Form Reminder</div><div class="fn-sub">SMS + Email follow-up</div></div></div>
+        </div>
+      </div>
+      <div class="fn-arrow"><div class="fn-arrow-line"></div><div class="fn-arrow-head"></div></div>
+      <div class="fn fn-action"><div class="fn-title">Onboarding Call Reminder</div><div class="fn-sub">24h before · 1h before · SMS + Email</div></div>
+      <div class="fn-arrow"><div class="fn-arrow-line"></div><div class="fn-arrow-head"></div></div>
+      <div class="fn fn-action"><div class="fn-title">Internal Team Notification</div><div class="fn-sub">Task assigned · Rep alerted</div></div>
+      <div class="fn-arrow"><div class="fn-arrow-line"></div><div class="fn-arrow-head"></div></div>
+      <div class="fn fn-end-human"><div class="fn-title">Post-Call Follow-up</div><div class="fn-sub">Resources sent · Check-in sequence begins</div></div>
+    </div>
+  </div>
+
+  <!-- ======================== PANEL 4: APPOINTMENT ======================== -->
+  <div class="panel" id="appointment">
+    <div class="wf-header">
+      <span class="wf-breadcrumb">Appointment Automation · Automation Sample</span>
+      <div class="wf-title">Appointment Reminder Workflow</div>
+      <div class="wf-subtitle">Exact steps — GoHighLevel</div>
+    </div>
+    <div class="legend">
+      <span class="legend-item"><span class="legend-swatch swatch-action"></span>Trigger / Action</span>
+      <span class="legend-item"><span class="legend-swatch swatch-wait"></span>Wait / System</span>
+      <span class="legend-item"><span class="legend-swatch swatch-decision"></span>Decision</span>
+      <span class="legend-item"><span class="legend-swatch swatch-end-human"></span>End: Human Follow Up</span>
+      <span class="legend-item"><span class="legend-swatch swatch-end-manual"></span>End: Follow Up Manually</span>
+    </div>
+    <div class="wf-chart">
+      <div class="fn fn-action"><div class="fn-title">Appointment Booked</div><div class="fn-sub">Calendar booking confirmed in GHL</div></div>
+      <div class="fn-arrow"><div class="fn-arrow-line"></div><div class="fn-arrow-head"></div></div>
+      <div class="fn fn-action"><div class="fn-title">Send Confirmation</div><div class="fn-sub">Instant SMS + Email with details</div></div>
+      <div class="fn-arrow"><div class="fn-arrow-line"></div><div class="fn-arrow-head"></div></div>
+      <div class="fn fn-wait"><div class="fn-title">Wait Until 24h Before</div></div>
+      <div class="fn-arrow"><div class="fn-arrow-line"></div><div class="fn-arrow-head"></div></div>
+      <div class="fn fn-action"><div class="fn-title">Send 24h Reminder</div><div class="fn-sub">Email with calendar link + prep details</div></div>
+      <div class="fn-arrow"><div class="fn-arrow-line"></div><div class="fn-arrow-head"></div></div>
+      <div class="fn fn-wait"><div class="fn-title">Wait Until 1h Before</div></div>
+      <div class="fn-arrow"><div class="fn-arrow-line"></div><div class="fn-arrow-head"></div></div>
+      <div class="fn fn-action"><div class="fn-title">Send 1h SMS Reminder</div><div class="fn-sub">"Your appointment is in 1 hour — see you soon"</div></div>
+      <div class="fn-arrow"><div class="fn-arrow-line"></div><div class="fn-arrow-head"></div></div>
+      <div class="fn fn-wait"><div class="fn-title">Wait for Appointment Time</div></div>
+      <div class="fn-arrow"><div class="fn-arrow-line"></div><div class="fn-arrow-head"></div></div>
+      <div class="fn-decision">
+        <div class="fn-diamond-wrap"><div class="fn-diamond"></div></div>
+        <div class="fn-decision-label">Did They Show Up?</div>
+        <div class="fn-decision-sub">Check appointment status in GHL</div>
+      </div>
+      <div class="fn-arrow"><div class="fn-arrow-line"></div><div class="fn-arrow-head"></div></div>
+      <div class="fn-branch">
+        <div class="fn-branch-col">
+          <span class="fn-branch-label">Yes</span>
+          <div class="fn-branch-arrow"><div class="fn-branch-arrow-line"></div><div class="fn-branch-arrow-head"></div></div>
+          <div class="fn-branch-node"><div class="fn fn-end-human"><div class="fn-title">Send Review Request</div><div class="fn-sub">Google review ask + feedback</div></div></div>
+        </div>
+        <div class="fn-branch-col">
+          <span class="fn-branch-label fn-branch-label--no">No</span>
+          <div class="fn-branch-arrow"><div class="fn-branch-arrow-line"></div><div class="fn-branch-arrow-head"></div></div>
+          <div class="fn-branch-node"><div class="fn fn-action"><div class="fn-title">Send Reschedule SMS</div><div class="fn-sub">Automatic re-booking link</div></div></div>
+        </div>
+      </div>
+      <div class="fn-arrow"><div class="fn-arrow-line"></div><div class="fn-arrow-head"></div></div>
+      <div class="fn fn-wait"><div class="fn-title">Wait 24 Hours</div></div>
+      <div class="fn-arrow"><div class="fn-arrow-line"></div><div class="fn-arrow-head"></div></div>
+      <div class="fn-decision">
+        <div class="fn-diamond-wrap"><div class="fn-diamond"></div></div>
+        <div class="fn-decision-label">Rescheduled?</div>
+      </div>
+      <div class="fn-arrow"><div class="fn-arrow-line"></div><div class="fn-arrow-head"></div></div>
+      <div class="fn-branch">
+        <div class="fn-branch-col">
+          <span class="fn-branch-label">Yes</span>
+          <div class="fn-branch-arrow"><div class="fn-branch-arrow-line"></div><div class="fn-branch-arrow-head"></div></div>
+          <div class="fn-branch-node"><div class="fn fn-end-human"><div class="fn-title">Restart Reminder Flow</div><div class="fn-sub">New appointment cycle begins</div></div></div>
+        </div>
+        <div class="fn-branch-col">
+          <span class="fn-branch-label fn-branch-label--no">No</span>
+          <div class="fn-branch-arrow"><div class="fn-branch-arrow-line"></div><div class="fn-branch-arrow-head"></div></div>
+          <div class="fn-branch-node"><div class="fn fn-end-manual"><div class="fn-title">Re-engagement Sequence</div><div class="fn-sub">Pipeline stage updated · Team notified</div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById(tab.dataset.target).classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html>

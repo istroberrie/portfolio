@@ -1,0 +1,12 @@
+# Claude Code local settings
+.claude/
+
+# Internal notes
+site-teardown.md
+CLAUDE.md
+memory/
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
