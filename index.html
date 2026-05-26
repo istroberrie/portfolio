@@ -59,7 +59,7 @@
        RESET
     ============================================= */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: auto; }
+    html { scroll-behavior: auto; overflow-x: hidden; max-width: 100%; }
 
     body {
       font-family: 'Inter', sans-serif;
@@ -68,6 +68,7 @@
       color: var(--text);
       background: var(--white);
       overflow-x: hidden;
+      max-width: 100%;
     }
 
     img, video { display: block; max-width: 100%; }
@@ -271,7 +272,7 @@
       padding: 0 20px;
     }
     .mob-logo { display: flex; align-items: center; }
-    .mob-logo img { width: 34px; height: 34px; object-fit: contain; }
+    .mob-logo img { width: 44px; height: 44px; object-fit: contain; }
     .mob-hamburger {
       display: flex;
       flex-direction: column;
@@ -836,7 +837,7 @@
        SERVICES SECTION
     ============================================= */
     .services-section { background: var(--white); padding-bottom: 0; }
-    .service-intro .section-heading { font-size: clamp(1.4rem, 2.2vw, 1.9rem); line-height: 1.2; }
+    .service-intro .section-heading { line-height: 1.2; }
 
     .services-layout {
       display: grid;
@@ -1976,10 +1977,12 @@
       .hero-btns { flex-wrap: wrap; gap: 10px; }
       .circle-badge { display: none; }
 
-      /* Pain section — GSAP animation on mobile, just tighten padding */
-      .problem-inner { padding: 48px 20px; }
-      .pain-card { padding: 32px 24px; }
-      .pain-card-num { font-size: 2.5rem; }
+      /* Pain section — GSAP animation on mobile, content top-aligned */
+      .problem-inner { padding: 40px 20px 20px; }
+      .pain-cards-wrap { max-height: 58vh; }
+      .pain-card { padding: 32px 24px 24px; justify-content: flex-start; }
+      .pain-card-icon { width: 60px; height: 60px; font-size: 1.6rem; }
+      .pain-card-num { font-size: 2.2rem; }
       .pain-progress { display: none; }
 
       /* Services — close the border box on single column */
@@ -2004,7 +2007,8 @@
       .step { padding-right: 0; }
 
       /* Testimonials */
-      .testimonials-section { padding: 64px 0; }
+      .testimonials-section { padding: 56px 0; }
+      .testi-intro { margin-bottom: 0; }
       .testi-grid { grid-template-columns: 1fr 1fr; margin-top: 20px; }
 
       /* Portfolio — native horizontal touch scroll */
@@ -2419,7 +2423,7 @@
           </div>
 
           <div>
-            <span class="eyebrow rv">Who We Are</span>
+            <span class="eyebrow rv">About</span>
             <h2 class="section-heading rv d1">
               <span class="line"><span class="line-inner">The operational partner</span></span>
               <span class="line"><span class="line-inner">behind the business</span></span>
@@ -3073,6 +3077,13 @@
       function splitAndAnimate(selector, splitType, childClass, triggerStart, staggerDelay) {
         if (typeof SplitType === 'undefined') return;
         document.querySelectorAll(selector).forEach(el => {
+          if (isMobile) {
+            gsap.from(el, {
+              autoAlpha: 0, y: 16, duration: 0.6, ease: 'power2.out',
+              scrollTrigger: { trigger: el, start: 'top 88%', toggleActions: 'play none none none' }
+            });
+            return;
+          }
           new SplitType(el, { types: splitType });
           el.querySelectorAll('.' + childClass).forEach((child, i) => {
             gsap.from(child, {
