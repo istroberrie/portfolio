@@ -256,6 +256,44 @@
     .sidebar-cta:hover { opacity: 1; color: var(--gold); }
 
     /* =============================================
+       MOBILE TOP BAR (≤768px only)
+    ============================================= */
+    .mobile-topbar {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 56px;
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      z-index: 201;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+    }
+    .mob-logo { display: flex; align-items: center; }
+    .mob-logo img { width: 34px; height: 34px; object-fit: contain; }
+    .mob-hamburger {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      padding: 8px;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+    .mob-bar {
+      display: block;
+      width: 22px;
+      height: 2px;
+      background: var(--navy);
+      transform-origin: center;
+      transition: transform 0.35s var(--ease-inout), opacity 0.25s ease, width 0.3s ease;
+    }
+    body.menu-open .mob-bar:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+    body.menu-open .mob-bar:nth-child(2) { opacity: 0; width: 0; }
+    body.menu-open .mob-bar:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+
+    /* =============================================
        FULL-SCREEN NAV MENU
     ============================================= */
     .nav-panel {
@@ -1915,21 +1953,31 @@
 
     /* ---- 768px: tablet portrait / mobile landscape ---- */
     @media (max-width: 768px) {
-      :root { --sidebar-w: 60px; }
+      :root { --sidebar-w: 0px; }
       .container { padding: 0 24px; }
       .section { padding: 72px 0; }
 
-      /* Hero */
+      /* Sidebar → hide; mobile top bar → show */
+      .sidebar { display: none; }
+      .mobile-topbar { display: flex; }
+
+      /* Offset anchor links below fixed topbar */
+      section[id] { scroll-margin-top: 56px; }
+
+      /* Nav panel → full-width, below topbar */
+      .nav-panel { left: 0; width: 100%; top: 56px; height: calc(100vh - 56px); padding: 48px 32px 60px; }
+
+      /* Hero — push content below top bar */
+      .hero { padding-top: 56px; }
       .hero-content { padding: 0 24px; }
       .hero-btns { flex-wrap: wrap; gap: 10px; }
       .circle-badge { display: none; }
-      .sidebar-socials { display: none; }
 
       /* Pain section — stack all cards, disable GSAP pin */
       .problem-section { height: auto !important; overflow: visible !important; }
       .problem-inner { flex-direction: column; height: auto; padding: 64px 0; gap: 28px; }
-      .pain-cards-wrap { position: static; overflow: visible; min-height: 0; height: auto; }
-      .pain-card { position: relative !important; inset: auto !important; transform: none !important; opacity: 1 !important; display: flex; flex-direction: column; }
+      .pain-cards-wrap { position: static; overflow: visible; min-height: 0; height: auto; display: flex; flex-direction: column; gap: 20px; border-radius: 0; padding: 0 20px; }
+      .pain-card { position: relative !important; inset: auto !important; transform: none !important; opacity: 1 !important; display: flex; flex-direction: column; padding: 36px 28px; }
       .pain-pip-row { display: none; }
 
       /* Services */
@@ -1946,8 +1994,9 @@
       .process-section { height: auto !important; overflow: visible !important; }
       .process-inner { padding: 0 24px; }
       .process-top { flex-direction: column; align-items: flex-start; gap: 16px; }
-      .process-steps { grid-template-columns: 1fr; }
+      .process-steps { grid-template-columns: 1fr; gap: 36px; }
       .process-steps::before { display: none; }
+      .step { padding-right: 0; }
       #processSteps .step { transform: none !important; opacity: 1 !important; }
 
       /* Testimonials */
@@ -1986,7 +2035,7 @@
 
     /* ---- 480px: small phones ---- */
     @media (max-width: 480px) {
-      :root { --sidebar-w: 52px; }
+      :root { --sidebar-w: 0px; }
       .container { padding: 0 18px; }
       .section { padding: 60px 0; }
 
@@ -2054,6 +2103,18 @@
       <a href="https://link.venberri.com/widget/bookings/discovery-call-strawberry" target="_blank" rel="noopener" class="sidebar-cta">Get in touch</a>
     </div>
   </aside>
+
+  <!-- Mobile top bar (shown on ≤768px, replaces sidebar) -->
+  <div class="mobile-topbar" id="mobileTopbar">
+    <a href="#hero" class="mob-logo" aria-label="venberri home">
+      <img src="favicon.png" alt="venberri">
+    </a>
+    <button class="mob-hamburger" id="menuToggleMob" aria-label="Toggle navigation">
+      <span class="mob-bar"></span>
+      <span class="mob-bar"></span>
+      <span class="mob-bar"></span>
+    </button>
+  </div>
 
   <!-- =============================================
        NAV PANEL
@@ -2905,6 +2966,10 @@
 
     if (menuToggle) {
       menuToggle.addEventListener('click', () => document.body.classList.toggle('menu-open'));
+    }
+    const menuToggleMob = document.getElementById('menuToggleMob');
+    if (menuToggleMob) {
+      menuToggleMob.addEventListener('click', () => document.body.classList.toggle('menu-open'));
     }
     if (menuScrim) menuScrim.addEventListener('click', closeMenu);
     navLinks.forEach(link => link.addEventListener('click', closeMenu));
