@@ -1967,9 +1967,9 @@
       /* Nav panel → full-width, below topbar */
       .nav-panel { left: 0; width: 100%; top: 56px; height: calc(100vh - 56px); padding: 48px 32px 60px; }
 
-      /* Hero — push content below top bar */
-      .hero { padding-top: 56px; }
-      .hero-content { padding: 0 24px; }
+      /* Hero — auto height so content never clips; stacked from top */
+      .hero { height: auto; min-height: 100svh; padding-top: 56px; padding-bottom: 56px; overflow: hidden; }
+      .hero-content { height: auto; align-items: flex-start; padding: 40px 24px 0; }
       .hero-btns { flex-wrap: wrap; gap: 10px; }
       .circle-badge { display: none; }
 
