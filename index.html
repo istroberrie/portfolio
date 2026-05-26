@@ -720,7 +720,7 @@
     .problem-head .eyebrow { color: var(--gold-soft); }
     .problem-heading {
       font-family: 'Poppins', sans-serif;
-      font-size: clamp(1.6rem, 3vw, 2.4rem);
+      font-size: clamp(2rem, 3.8vw, 3rem);
       font-weight: 800;
       color: #fff;
       line-height: 1.1;
@@ -3074,6 +3074,9 @@
     function initGSAPAnimations() {
       if (typeof gsap === 'undefined') return;
 
+      // Declared at top so all inner functions can close over it without TDZ
+      const isMobile = window.innerWidth <= 768;
+
       // ---- splitAndAnimate: exact clone of core-syndicate pattern ----
       // Each char/line/word slides in from x:70 with stagger on scroll
       function splitAndAnimate(selector, splitType, childClass, triggerStart, staggerDelay) {
@@ -3131,7 +3134,6 @@
       // ---- Pain cards: pinned, slide-up one at a time with snap ----
       // Initialized FIRST because it appears first in DOM — its pin spacer must
       // exist before the process section's start position is calculated.
-      const isMobile = window.innerWidth <= 768;
 
       const painSection = document.querySelector('.problem-section');
       const painCards   = gsap.utils.toArray('.pain-card');
@@ -3158,18 +3160,19 @@
 
         tl.set({}, {}, n - 1);
 
+        // On mobile: pin starts below the 56px topbar; snap disabled
+        // (snap + native touch scroll conflict and feel broken)
+        const topbarH = isMobile ? 56 : 0;
         ScrollTrigger.create({
           trigger: painSection,
           pin: true,
-          start: 'top top',
+          start: isMobile ? `top ${topbarH}px` : 'top top',
           end: () => `+=${(n - 1) * window.innerHeight}`,
           invalidateOnRefresh: true,
           scrub: 1,
           animation: tl,
-          // Disable snap on inbound hash loads — snap fires 50ms after landing
-          // at the target and snaps progress>1 back to section end, pulling us
-          // away from the intended scroll position.
-          snap: window._inboundHash ? false : {
+          // Disable snap on inbound hash loads or mobile (native touch conflicts)
+          snap: (window._inboundHash || isMobile) ? false : {
             snapTo: 1 / (n - 1),
             duration: { min: 0.3, max: 0.5 },
             ease: 'power1.inOut',
