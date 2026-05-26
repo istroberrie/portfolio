@@ -3277,13 +3277,15 @@
         scrollTrigger: { trigger: '.faq-cols', start: 'top 85%', toggleActions: 'play none none none' }
       });
 
-      // ---- Section blur on scroll-in (reference: section-blur effect) ----
-      gsap.utils.toArray('.services-section, .faq-section, .about-section').forEach(section => {
-        gsap.from(section, {
-          filter: 'blur(14px)', ease: 'none',
-          scrollTrigger: { trigger: section, start: 'top bottom', end: 'top 55%', scrub: true }
+      // ---- Section blur on scroll-in (desktop only — on mobile blur bleeds across sections) ----
+      if (!isMobile) {
+        gsap.utils.toArray('.services-section, .faq-section, .about-section').forEach(section => {
+          gsap.from(section, {
+            filter: 'blur(14px)', ease: 'none',
+            scrollTrigger: { trigger: section, start: 'top bottom', end: 'top 55%', scrub: true }
+          });
         });
-      });
+      }
 
       // ---- General .rv (exclude elements with their own animations) ----
       gsap.utils.toArray('.rv').forEach(el => {
