@@ -2928,6 +2928,22 @@
        SCRIPTS
   ============================================= -->
   <script>
+  // ------------------------------------------
+  // External hash navigation fix
+  // The browser scrolls to a hash anchor BEFORE
+  // GSAP creates its pin spacers, so every anchor
+  // from an external page lands at the wrong spot.
+  // Strip the hash now, store it, then re-scroll
+  // after all ScrollTriggers are initialized.
+  // ------------------------------------------
+  const _inboundHash = window.location.hash;
+  if (_inboundHash) {
+    history.replaceState(null, '', location.pathname + location.search);
+    window.scrollTo(0, 0);
+  }
+  </script>
+
+  <script>
   document.addEventListener('DOMContentLoaded', () => {
 
     // ------------------------------------------
@@ -3342,6 +3358,26 @@
         }
       });
     });
+
+    // ------------------------------------------
+    // Re-scroll to inbound hash after GSAP init
+    // All pin spacers now exist — lenis.scrollTo
+    // calculates the correct scroll position.
+    // ------------------------------------------
+    if (_inboundHash) {
+      const hashTarget = document.querySelector(_inboundHash);
+      if (hashTarget) {
+        ScrollTrigger.refresh();
+        setTimeout(() => {
+          if (lenis) {
+            lenis.scrollTo(hashTarget, { immediate: true, duration: 0 });
+          } else {
+            hashTarget.scrollIntoView({ behavior: 'instant' });
+          }
+          history.replaceState(null, '', _inboundHash);
+        }, 400);
+      }
+    }
 
   }); // DOMContentLoaded
   </script>
