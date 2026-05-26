@@ -1970,7 +1970,9 @@
       /* Hero — auto height so content never clips; stacked from top */
       .hero { height: auto; min-height: 100svh; padding-top: 56px; padding-bottom: 56px; overflow: hidden; }
       .hero-content { height: auto; align-items: flex-start; padding: 40px 24px 0; }
-      .hero-title { font-size: 1.55rem; line-height: 1.2; }
+      .hero-title { font-size: 1.72rem; line-height: 1.22; }
+      .hero-title .line { display: inline; overflow: visible; }
+      .hero-title .line-inner { display: inline; transform: none; }
       .hero-btns { flex-wrap: wrap; gap: 10px; }
       .circle-badge { display: none; }
 
@@ -1991,7 +1993,7 @@
       .about-img-wrap::before { display: none; }
 
       /* Process — disable GSAP pin, show all steps */
-      .process-section { height: auto !important; overflow: visible !important; }
+      .process-section { height: auto !important; overflow: visible !important; padding-bottom: 64px; }
       .process-inner { padding: 0 24px; }
       .process-top { flex-direction: column; align-items: flex-start; gap: 16px; }
       .process-heading { font-size: 1.55rem; line-height: 1.15; }
@@ -2002,7 +2004,8 @@
       .step { padding-right: 0; }
 
       /* Testimonials */
-      .testi-grid { grid-template-columns: 1fr 1fr; margin-top: 28px; }
+      .testimonials-section { padding: 64px 0; }
+      .testi-grid { grid-template-columns: 1fr 1fr; margin-top: 20px; }
 
       /* Portfolio — native horizontal touch scroll */
       .portfolio-section { height: auto !important; overflow: visible !important; }
