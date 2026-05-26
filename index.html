@@ -1973,17 +1973,16 @@
       .hero-btns { flex-wrap: wrap; gap: 10px; }
       .circle-badge { display: none; }
 
-      /* Pain section — stack all cards, disable GSAP pin */
-      .problem-section { height: auto !important; overflow: visible !important; }
-      .problem-inner { flex-direction: column; height: auto; padding: 64px 0; gap: 28px; }
-      .pain-cards-wrap { position: static; overflow: visible; min-height: 0; height: auto; display: flex; flex-direction: column; gap: 20px; border-radius: 0; padding: 0 20px; }
-      .pain-card { position: relative !important; inset: auto !important; transform: none !important; opacity: 1 !important; display: flex; flex-direction: column; padding: 36px 28px; }
-      .pain-pip-row { display: none; }
+      /* Pain section — GSAP animation on mobile, just tighten padding */
+      .problem-inner { padding: 48px 20px; }
+      .pain-card { padding: 32px 24px; }
+      .pain-card-num { font-size: 2.5rem; }
+      .pain-progress { display: none; }
 
-      /* Services */
-      .services-layout { grid-template-columns: 1fr; }
-      .service-intro { grid-row: auto; }
-      .svc-card { border-left: none !important; }
+      /* Services — close the border box on single column */
+      .services-layout { grid-template-columns: 1fr; border-right: 1px solid var(--border); }
+      .service-intro { grid-row: auto; border-right: none; border-bottom: 1px solid var(--border); }
+      .svc-card { border-left: none !important; border-right: none !important; }
 
       /* About */
       .about-grid { grid-template-columns: 1fr; gap: 36px; }
@@ -1994,13 +1993,13 @@
       .process-section { height: auto !important; overflow: visible !important; }
       .process-inner { padding: 0 24px; }
       .process-top { flex-direction: column; align-items: flex-start; gap: 16px; }
+      .process-heading { font-size: 1.55rem; line-height: 1.15; }
       .process-steps { grid-template-columns: 1fr; gap: 36px; }
       .process-steps::before { display: none; }
       .step { padding-right: 0; }
-      #processSteps .step { transform: none !important; opacity: 1 !important; }
 
       /* Testimonials */
-      .testi-grid { grid-template-columns: 1fr 1fr; }
+      .testi-grid { grid-template-columns: 1fr 1fr; margin-top: 28px; }
 
       /* Portfolio — native horizontal touch scroll */
       .portfolio-section { height: auto !important; overflow: visible !important; }
@@ -2937,7 +2936,7 @@
     // Lenis + GSAP ticker integration
     // ------------------------------------------
     let lenis;
-    if (typeof Lenis !== 'undefined') {
+    if (typeof Lenis !== 'undefined' && window.innerWidth > 768) {
       lenis = new Lenis({
         duration: 1.25,
         easing: t => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
@@ -3086,7 +3085,7 @@
       const painCards   = gsap.utils.toArray('.pain-card');
       const painPips    = document.querySelectorAll('.pain-pip');
 
-      if (painSection && painCards.length && !isMobile) {
+      if (painSection && painCards.length) {
         const n = painCards.length;
 
         painCards.forEach((card, i) => {
@@ -3138,8 +3137,11 @@
         const np = processStepEls.length;
 
         if (isMobile) {
-          // On mobile: show all steps immediately, no pin
-          gsap.set(processStepEls, { x: 0, autoAlpha: 1 });
+          // On mobile: staggered scroll-triggered fade-in, no pin
+          gsap.from(processStepEls, {
+            y: 24, autoAlpha: 0, duration: 0.5, stagger: 0.12, ease: 'power2.out',
+            scrollTrigger: { trigger: '#processSteps', start: 'top 82%', toggleActions: 'play none none none' }
+          });
         } else {
         gsap.set(processStepEls, { x: 90, autoAlpha: 0 });
 
