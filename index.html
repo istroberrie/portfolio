@@ -2930,9 +2930,11 @@
   <script>
   // ------------------------------------------
   // External hash navigation fix
+  // Disable browser scroll restoration so it can't fight our scroll.
   // const/let don't cross script tag boundaries —
   // store on window so DOMContentLoaded can read it.
   // ------------------------------------------
+  history.scrollRestoration = 'manual';
   window._inboundHash = window.location.hash;
   if (window._inboundHash) {
     history.replaceState(null, '', location.pathname + location.search);
@@ -3329,24 +3331,61 @@
       });
 
       // ---- Inbound hash scroll ----
-      // Runs here after ALL pin spacers exist.
-      // The preloader is still visible at this point (hidePreloader kept it
-      // up when _inboundHash was set), so the user never sees the hero.
-      // We use the same lenis.scrollTo call that internal nav links use,
-      // which correctly accounts for pin spacers via Lenis+ScrollTrigger.
-      // After scrolling, we fade the preloader to reveal the right section.
+      // Runs here after ALL pin spacers exist. Preloader is still covering
+      // the page so the hero never flashes.
+      //
+      // getBoundingClientRect and lenis.scrollTo(element) both compute
+      // positions BEFORE GSAP's pin spacers are fully reflected in layout,
+      // landing one section early. The fix: read ScrollTrigger's own
+      // computed .start values, which already account for every pin spacer.
+      //
+      // For a section with a pin trigger:
+      //   st.start = scroll-Y where element top = viewport top  ← use as-is
+      // For a section with a blur trigger (start: 'top bottom'):
+      //   st.start = scroll-Y where element top = viewport bottom
+      //   → element at viewport top = st.start + innerHeight
       if (window._inboundHash) {
         const hashTarget = document.querySelector(window._inboundHash);
         if (hashTarget) {
           ScrollTrigger.refresh();
+          // Double RAF: give the browser two layout frames to fully
+          // settle pin spacer geometry after the refresh call.
           requestAnimationFrame(() => requestAnimationFrame(() => {
+            let targetY = null;
+
+            for (const st of ScrollTrigger.getAll()) {
+              if (st.trigger !== hashTarget) continue;
+              if (st.pin) {
+                // Pinned section: st.start = scroll-Y where element top = viewport top
+                targetY = Math.max(0, st.start);
+                break;
+              }
+              // Non-pin trigger — check original start keyword
+              const s = st.vars?.start || '';
+              if (typeof s === 'string' && s.includes('bottom')) {
+                // 'top bottom': st.start = scroll-Y where element top = viewport bottom
+                // element at viewport top = st.start + innerHeight
+                targetY = Math.max(0, st.start + window.innerHeight);
+              } else {
+                targetY = Math.max(0, st.start);
+              }
+              break;
+            }
+
+            // Fallback: no matching ScrollTrigger — use absolute offset
+            if (targetY === null) {
+              targetY = hashTarget.getBoundingClientRect().top + window.pageYOffset;
+            }
+
+            // Use lenis.scrollTo(number) — avoids BoundingClientRect math
+            // which is relative-to-viewport and wrong if scroll ≠ 0
             if (lenis) {
-              lenis.scrollTo(hashTarget, { offset: 0, immediate: true, duration: 0 });
+              lenis.scrollTo(targetY, { immediate: true, duration: 0 });
             } else {
-              hashTarget.scrollIntoView({ behavior: 'instant' });
+              window.scrollTo(0, targetY);
             }
             history.replaceState(null, '', window._inboundHash);
-            // Fade preloader now — reveals the correct section, not the hero
+            // Reveal the correct section — not the hero
             preloader.classList.add('hidden');
           }));
         } else {
